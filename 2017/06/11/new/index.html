@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>new的理解 | fireofsouth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="想必都明白Javascript中，万物皆对象这个概念，那么为什么还需要用new来产生对象，它又将进行怎样的操作呢？接下来通过一小段代码探索运算符new的奥秘…">
+<meta property="og:type" content="article">
+<meta property="og:title" content="new的理解">
+<meta property="og:url" content="http://fireofsouth.com/2017/06/11/new/index.html">
+<meta property="og:site_name" content="fireofsouth">
+<meta property="og:description" content="想必都明白Javascript中，万物皆对象这个概念，那么为什么还需要用new来产生对象，它又将进行怎样的操作呢？接下来通过一小段代码探索运算符new的奥秘…">
+<meta property="og:updated_time" content="2017-06-12T15:40:48.548Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="new的理解">
+<meta name="twitter:description" content="想必都明白Javascript中，万物皆对象这个概念，那么为什么还需要用new来产生对象，它又将进行怎样的操作呢？接下来通过一小段代码探索运算符new的奥秘…">
+  
+    <link rel="alternate" href="/atom.xml" title="fireofsouth" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">fireofsouth</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">坚持一件事是美好的</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://fireofsouth.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-new" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/06/11/new/" class="article-date">
+  <time datetime="2017-06-11T13:36:21.239Z" itemprop="datePublished">2017-06-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      new的理解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>想必都明白Javascript中，万物皆对象这个概念，那么为什么还需要用new来产生对象，它又将进行怎样的操作呢？接下来通过一小段代码探索运算符new的奥秘…<br><a id="more"></a></p>
+<h2 id="通过代码认识new运算符"><a href="#通过代码认识new运算符" class="headerlink" title="通过代码认识new运算符"></a>通过代码认识new运算符</h2><pre><code>1.function Person(name) {
+       this.name = name;
+   }
+
+2.  Person.age = 23;
+
+3. Person.prototype.sayName = function() {
+       console.log(&apos;i am &apos; + this.name);
+   }
+
+4. var p1 = new Person(&apos;jack&apos;);
+
+5.console.log(p1.name, p1.age); // jack undefined
+6.p1.sayName(); // i am jack
+
+7.console.log(Person.name, Person.age); //Person, 23
+8.Person.sayName(); //typeError
+</code></pre><h3 id="解读代码片段"><a href="#解读代码片段" class="headerlink" title="解读代码片段"></a>解读代码片段</h3><p>1.创建一个函数Person.并在其this上定义了属性：name,name的值是函数执行时的形参。<br>2.在Person函数上(函数即对象)上定义一个静态属性:age,并赋值23。<br>3.在Person函数的原型对象prototype上定义一个sayName()方法，用于输出this的name。<br>4.通过new关键字创建了一个新对象p1。<br>5-8.尝试访问对象的属性和方法。</p>
+<h3 id="主要理解new的行为"><a href="#主要理解new的行为" class="headerlink" title="主要理解new的行为"></a>主要理解new的行为</h3><p>var p1 = new Person(‘jack’);<br>其中new Person(‘jack’)可以用一下伪代码模拟：</p>
+<pre><code>{
+    var obj = {};
+    obj._proto_ = Person.prototype;
+    var result = Person.call(obj,&apos;jack&apos;);
+    return typeof result === &apos;object&apos; ? result : obj;
+
+}
+</code></pre><ol>
+<li>创建一个空对象obj;</li>
+<li>把obj的_<em>proto</em>指向Person的原型对象prototype(js用于继承的原型),便建立了obj的原型链obj-&gt;Person.prototype-&gt;Object.prototype-&gt;null</li>
+<li>利用call改变执行环境，用obj的执行环境执行Person函数.并返回对象<h3 id="分析输出结果"><a href="#分析输出结果" class="headerlink" title="分析输出结果"></a>分析输出结果</h3></li>
+<li>p1.name,p1.age: 在执行中p1.name相当于obj.name会将name的值赋值到this上然后this指向p1,而p1.age没有放在this,并且也不属于Person.prototype对象的属性，所以P1无法访问到age属性</li>
+<li>p1.sayName(),可以看到p1对象的this上没有sayName()方法,但是p1.<strong>proto</strong>指向Person.prototype通过原型链可以访问到Person.prototype上的方法。<br>3.Person.name,Person.age都能输出值，首先Person为构造函数所以会自动生成构造函数名name属性,所以能够访问到name属性,其次函数即对象,Person对象上有给age属性赋值所以能够访问到age属性。<br>4.Person.sayName,看看Person的原型链Person-&gt;Function.prototype-&gt;Object.prototype-&gt;null,可以看到Person是直接访问不到sayName的方法。<h2 id="new存在的意义"><a href="#new存在的意义" class="headerlink" title="new存在的意义"></a>new存在的意义</h2>认识new运算符之后，我们来搞清楚p1和Person的关系。通过上面分析我们可以得到p1继承了Person的部分属性，可以理解为p1和Person是继承关系。另外，p1是通过new产生的对象，那么p1是不是Person的实例对象?  </li>
+</ol>
+<pre><code>p1 instanceof Person //true
+</code></pre><p>可以看出p1是Person的实例对象</p>
+<pre><code>var L = p1.__proto__;
+var R = Person.prototype;
+return L == R ; //true
+</code></pre><p>可以看出p1可以通过原型链的方式访问到Person的属性</p>
+<h3 id="简单的总结语"><a href="#简单的总结语" class="headerlink" title="简单的总结语"></a>简单的总结语</h3><p>在javascript中, 通过new可以产生原对象的一个实例对象，而这个实例对象继承了原对象的属性和方法。因此，new存在的意义在于它实现了javascript中的继承，而不仅仅是实例化了一个对象！</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://fireofsouth.com/2017/06/11/new/" data-id="cj3ub59k00002i4vbzde3fkwx" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/05/13/first-blog/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">http缓存</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/06/">六月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/06/11/new/">new的理解</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/13/first-blog/">http缓存</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/13/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Fangyi Hu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
